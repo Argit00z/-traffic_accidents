@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рекомендации по маршруту</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+    <link rel="stylesheet" href="./styles/style.css">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
+    <script src="/backend/script_map.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="nav_header">
+            <ul>
+                <li><a href="#">Главная</a></li>
+                <li><a href="#">О проекте</a></li>
+                <li><a href="#">Контакты</a></li>
+                <li><a href="#">Войти</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="controls">
+            <label for="start">Начальная точка (город или адрес):</label>
+            <input type="text" id="start" placeholder="Москва, Красная площадь">
+            <label for="end">Конечная точка (город или адрес):</label>
+            <input type="text" id="end" placeholder="Москва, Ленинградский проспект">
+            <button onclick="buildRouteFromInput()">Построить маршрут</button>
+            <div id="loading">Загрузка...</div>
+            <div id="route-info"></div>  
+        </section>
+
+        <section class="application">
+            
+            
+            <div id="map"></div>
+        </section>
+
+        
+    </main>
+
+    <!-- <footer>
+        <div class="copyright">
+            &copy; 2024 Опасные участки на дарогах Росси <br/>
+        </div>
+    </footer> -->
+</body>
+</html>
