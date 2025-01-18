@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
     <link rel="stylesheet" href="./styles/style.css">
+
+    <script src="./scripts/script.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
     <script src="/backend/script_map.js" defer></script>
 </head>
@@ -23,29 +25,22 @@
     </header>
 
     <main>
+        <button id="toggle-controls">Скрыть/Показать управление</button>
         <section class="controls">
-            <label for="start">Начальная точка (город или адрес):</label>
-            <input type="text" id="start" placeholder="Москва, Красная площадь">
-            <label for="end">Конечная точка (город или адрес):</label>
-            <input type="text" id="end" placeholder="Москва, Ленинградский проспект">
-            <button onclick="buildRouteFromInput()">Построить маршрут</button>
-            <div id="loading">Загрузка...</div>
-            <div id="route-info"></div>  
+            <div class="controls-content">
+                <label for="start">Начальная точка (город или адрес):</label>
+                <input type="text" id="start" placeholder="Москва, Красная площадь">
+                <label for="end">Конечная точка (город или адрес):</label>
+                <input type="text" id="end" placeholder="Москва, Ленинградский проспект">
+                <button onclick="buildRouteFromInput()">Построить маршрут</button>
+                <div id="loading">Загрузка...</div>
+                <div id="route-info"></div>  
+            </div>
         </section>
 
         <section class="application">
-            
-            
             <div id="map"></div>
         </section>
-
-        
     </main>
-
-    <!-- <footer>
-        <div class="copyright">
-            &copy; 2024 Опасные участки на дарогах Росси <br/>
-        </div>
-    </footer> -->
 </body>
 </html>
