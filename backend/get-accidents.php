@@ -34,11 +34,16 @@ if (!$region) {
 // Экранируем регионы для безопасности
 $regions = array_map('pg_escape_string', explode(',', $region));
 
+// Категории ДТП, которые мы хотим учитывать
+$categories = ['Наезд на пешехода', 'Столкновение', 'Наезд на стоящее ТС', 'Наезд на препятствие'];
+$categories = array_map('pg_escape_string', $categories);
+
 // Формируем SQL-запрос
-$query = "SELECT id, latitude, longitude, severity 
+$query = "SELECT id, latitude, longitude, severity, category 
           FROM accidents 
           WHERE region IN ('" . implode("','", $regions) . "')
           AND datetime::date BETWEEN '$start_date' AND '$end_date'
+          AND category IN ('" . implode("','", $categories) . "')
           LIMIT $limit";
 
 // Выполняем запрос

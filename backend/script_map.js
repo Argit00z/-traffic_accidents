@@ -36,6 +36,14 @@ function geocode(query, callback) {
         });
 }
 
+// Объект для сопоставления категорий ДТП с цветами
+const categoryColors = {
+    'Наезд на пешехода': 'red',
+    'Столкновение': 'blue',
+    'Наезд на стоящее ТС': 'green',
+    'Наезд на препятствие': 'orange'
+};
+
 // Функция для поиска опасных участков
 function findDangerousSections(route, accidents) {
     const dangerousSections = [];
@@ -69,7 +77,10 @@ function findDangerousSections(route, accidents) {
 
             // Если количество ДТП превышает порог, добавляем участок в опасные
             if (accidentCounts[sectionKey] >= threshold) {
-                dangerousSections.push(nearestPoint);
+                dangerousSections.push({
+                    ...nearestPoint,
+                    category: accident.category // Добавляем категорию ДТП
+                });
             }
         }
     });
@@ -113,7 +124,7 @@ function getDistance(point1, point2) {
     return R * c; // Расстояние в километрах
 }
 
-// Функция для группировки точек по близости
+// Функция для группировки точек по близости и категориям ДТП
 function groupPoints(points, maxDistance) {
     const groupedPoints = [];
 
@@ -122,17 +133,27 @@ function groupPoints(points, maxDistance) {
 
         // Проверяем, можно ли добавить точку в существующую группу
         for (let group of groupedPoints) {
-            const distance = getDistance(
-                { lat: point.geometry.coordinates[1], lng: point.geometry.coordinates[0] },
-                { lat: group.center[1], lng: group.center[0] }
-            );
+            // Проверяем, что категория ДТП совпадает
+            if (group.category !== point.category) {
+                continue; // Пропускаем группы с другой категорией
+            }
 
-            // Если точка находится в пределах maxDistance, добавляем её в группу
-            if (distance <= maxDistance) {
+            // Проверяем расстояние до каждой точки в группе
+            const isNear = group.points.some(groupPoint => {
+                const distance = getDistance(
+                    { lat: point.geometry.coordinates[1], lng: point.geometry.coordinates[0] },
+                    { lat: groupPoint.geometry.coordinates[1], lng: groupPoint.geometry.coordinates[0] }
+                );
+                return distance <= maxDistance;
+            });
+
+            // Если точка находится в пределах maxDistance от любой точки в группе, добавляем её в группу
+            if (isNear) {
                 group.points.push(point);
+                // Пересчитываем центр группы
                 group.center = [
-                    (group.center[0] * group.points.length + point.geometry.coordinates[0]) / (group.points.length + 1),
-                    (group.center[1] * group.points.length + point.geometry.coordinates[1]) / (group.points.length + 1)
+                    group.points.reduce((sum, p) => sum + p.geometry.coordinates[0], 0) / group.points.length,
+                    group.points.reduce((sum, p) => sum + p.geometry.coordinates[1], 0) / group.points.length
                 ];
                 addedToGroup = true;
                 break;
@@ -143,12 +164,74 @@ function groupPoints(points, maxDistance) {
         if (!addedToGroup) {
             groupedPoints.push({
                 center: [point.geometry.coordinates[0], point.geometry.coordinates[1]],
-                points: [point]
+                points: [point],
+                category: point.category // Сохраняем категорию ДТП для группы
             });
         }
     });
 
     return groupedPoints;
+}
+
+// Функция для сортировки точек вдоль маршрута
+function sortPointsAlongRoute(routeLineString, points) {
+    return points.map(point => {
+        const nearestPoint = turf.nearestPointOnLine(routeLineString, point);
+        return {
+            ...point,
+            distanceAlongRoute: nearestPoint.properties.location // Расстояние вдоль маршрута
+        };
+    }).sort((a, b) => a.distanceAlongRoute - b.distanceAlongRoute); // Сортируем по расстоянию от начала маршрута
+}
+
+// Функция для сортировки населенных пунктов вдоль маршрута
+function sortLocationsAlongRoute(routeLineString, locationsMap) {
+    const sortedLocations = [];
+
+    locationsMap.forEach((groups, location) => {
+        // Берем первую группу для определения координат населенного пункта
+        const [lng, lat] = groups[0].center;
+
+        // Находим ближайшую точку на маршруте
+        const nearestPoint = turf.nearestPointOnLine(routeLineString, turf.point([lng, lat]));
+
+        // Добавляем населенный пункт в массив с расстоянием вдоль маршрута
+        sortedLocations.push({
+            location,
+            groups,
+            distanceAlongRoute: nearestPoint.properties.location
+        });
+    });
+
+    // Сортируем населенные пункты по расстоянию вдоль маршрута
+    sortedLocations.sort((a, b) => a.distanceAlongRoute - b.distanceAlongRoute);
+
+    return sortedLocations;
+}
+
+// Функция для определения населенного пункта по координатам
+async function getLocationFromCoordinates(lat, lng) {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.address) {
+            // Возвращаем город, деревню, поселок или другой населенный пункт
+            return (
+                data.address.city ||
+                data.address.town ||
+                data.address.village ||
+                data.address.hamlet ||
+                data.address.suburb ||
+                data.address.state || // Если населенный пункт не найден, возвращаем регион
+                'неизвестно'
+            );
+        }
+        return 'неизвестно'; // Если адрес не найден
+    } catch (error) {
+        console.error('Ошибка при определении населенного пункта:', error);
+        return 'неизвестно';
+    }
 }
 
 // Массив для хранения красных полилиний
@@ -164,6 +247,10 @@ async function buildRoute(start, end) {
     // Удаляем все существующие красные полилинии
     dangerousPolylines.forEach(polyline => map.removeLayer(polyline));
     dangerousPolylines = [];
+
+    // Удаляем предыдущие маркеры начала и конца маршрута
+    if (window.startMarker) map.removeLayer(window.startMarker);
+    if (window.endMarker) map.removeLayer(window.endMarker);
 
     try {
         // Получаем данные о маршруте
@@ -184,6 +271,15 @@ async function buildRoute(start, end) {
 
         // Установка границ карты по маршруту
         map.fitBounds(window.routeLine.getBounds());
+
+        // Добавляем маркеры начала и конца маршрута
+        window.startMarker = L.marker([start.lat, start.lng], {
+            title: 'Начало маршрута'
+        }).addTo(map).bindPopup('Начало маршрута');
+
+        window.endMarker = L.marker([end.lat, end.lng], {
+            title: 'Конец маршрута'
+        }).addTo(map).bindPopup('Конец маршрута');
 
         // Определяем регионы по маршруту
         const regions = await getRegionsFromRoute(route);
@@ -208,14 +304,23 @@ async function buildRoute(start, end) {
         // Группировка опасных участков
         const groupedSections = groupPoints(dangerousSections, 1); // Группируем точки в пределах 1 км
 
-        // Отображение опасных участков на карте
-        groupedSections.forEach(group => {
-            // Привязываем центр группы к ближайшей точке на маршруте
-            const centerPoint = turf.point([group.center[0], group.center[1]]);
-            const nearestPointOnRoute = turf.nearestPointOnLine(routeLineString, centerPoint);
+        // Преобразуем центры групп в точки для сортировки
+        const groupCenters = groupedSections.map(group => turf.point(group.center));
 
-            const lng = nearestPointOnRoute.geometry.coordinates[0];
-            const lat = nearestPointOnRoute.geometry.coordinates[1];
+        // Сортируем опасные участки вдоль маршрута
+        const sortedSections = sortPointsAlongRoute(routeLineString, groupCenters);
+
+        // Отображение опасных участков на карте
+        sortedSections.forEach((section, index) => {
+            const group = groupedSections[index];
+
+            // Пропускаем группы с одним или менее опасным участком
+            if (group.points.length <= 1) {
+                return;
+            }
+
+            const lng = section.geometry.coordinates[0];
+            const lat = section.geometry.coordinates[1];
 
             // Проверяем, что координаты являются числами
             if (Number.isNaN(lng) || Number.isNaN(lat)) {
@@ -223,18 +328,27 @@ async function buildRoute(start, end) {
                 return; // Пропускаем этот участок
             }
 
+            // Определяем цвет маркера на основе категории ДТП
+            const category = group.points[0].category; // Берем категорию первой точки в группе
+            const color = categoryColors[category] || 'gray'; // Если категория не найдена, используем серый цвет
+
             // Создаём маркер для группы
             const marker = L.circleMarker([lat, lng], {
-                color: 'red',
+                color: color,
                 radius: 5 + Math.log(group.points.length) * 2, // Размер маркера зависит от количества точек в группе
                 fillOpacity: 0.8
             }).addTo(map);
 
-            // Добавляем подсказку с количеством точек в группе
-            marker.bindTooltip(`Опасных участков: ${group.points.length}`, {
+            // Добавляем подсказку с количеством точек в группе и категорией
+            const categories = group.points.map(point => point.category).join(', ');
+            marker.bindTooltip(`Опасных участков: ${group.points.length} (${categories})`, {
                 permanent: false,
                 direction: 'top'
             });
+
+            // Добавляем текстовую подсказку
+            const tooltipText = `Будьте осторожны на этом участке дороги. Количество опасных участков: ${group.points.length}. Категории: ${categories}. Снизьте скорость.`;
+            marker.bindPopup(tooltipText);
 
             dangerousPolylines.push(marker);
             console.log('Группа опасных участков отображена на карте:', group);
@@ -243,15 +357,76 @@ async function buildRoute(start, end) {
         // Вывод рекомендаций
         const routeInfo = document.getElementById('route-info');
         let infoText = 'Рекомендации по маршруту:<br>';
-        groupedSections.forEach(group => {
-            infoText += `Будьте осторожны на участке дороги около (${group.center[1].toFixed(4)}, ${group.center[0].toFixed(4)}). Количество опасных участков: ${group.points.length}. Снизьте скорость.<br>`;
+
+        // Группируем опасные участки по населенным пунктам
+        const locationsMap = new Map();
+
+        for (const group of groupedSections) {
+            // Фильтруем группы, где количество ДТП больше одного
+            if (group.points.length > 1) {
+                const [lng, lat] = group.center;
+                const location = await getLocationFromCoordinates(lat, lng);
+
+                if (!locationsMap.has(location)) {
+                    locationsMap.set(location, []);
+                }
+
+                locationsMap.get(location).push(group);
+            }
+        }
+
+        // Сортируем населенные пункты вдоль маршрута
+        const sortedLocations = sortLocationsAlongRoute(routeLineString, locationsMap);
+
+        // Добавляем рекомендации для каждого населенного пункта в порядке маршрута
+        sortedLocations.forEach(({ location, groups }) => {
+            infoText += `
+                <div class="recommendation">
+                    <p>В населенном пункте ${location} будьте осторожны. Опасные участки:</p>
+                    <ul>
+                        ${groups.map(group => {
+                            const category = group.category || 'неизвестно';
+                            const warning = getWarningByCategory(category);
+                            const centerLat = group.center[1].toFixed(4);
+                            const centerLng = group.center[0].toFixed(4);
+
+                            return `
+                                <li>
+                                    <p>Участок около (${centerLat}, ${centerLng})</p>
+                                    <button onclick="map.setView([${centerLat}, ${centerLng}], 15)">Перейти к участку</button>
+                                    <p>Количество ДТП: ${group.points.length}</p>
+                                    <p>Категория ДТП: ${category}</p>
+                                    <p>Рекомендация: ${warning}</p>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
+                </div>
+            `;
         });
+
         routeInfo.innerHTML = infoText;
     } catch (error) {
         console.error('Ошибка:', error);
         alert('Произошла ошибка при загрузке данных. Пожалуйста, попробуйте позже.');
     } finally {
         document.getElementById('loading').style.display = 'none';
+    }
+}
+
+// Функция для получения рекомендации по категории ДТП
+function getWarningByCategory(category) {
+    switch (category) {
+        case 'Наезд на пешехода':
+            return 'Будьте внимательны к пешеходам, особенно в зонах пешеходных переходов.';
+        case 'Столкновение':
+            return 'Соблюдайте дистанцию и скоростной режим, чтобы избежать столкновений.';
+        case 'Наезд на стоящее ТС':
+            return 'Обращайте внимание на стоящие транспортные средства, особенно в узких местах.';
+        case 'Наезд на препятствие':
+            return 'Следите за дорожными знаками и разметкой, чтобы избежать наезда на препятствия.';
+        default:
+            return 'Будьте осторожны на этом участке дороги.';
     }
 }
 

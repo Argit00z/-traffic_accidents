@@ -11,6 +11,7 @@
     <script src="./scripts/script.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
     <script src="/backend/script_map.js" defer></script>
+    
 </head>
 <body>
     <header>
@@ -25,16 +26,20 @@
     </header>
 
     <main>
-        <button id="toggle-controls">Скрыть/Показать управление</button>
+        <button id="toggle-controls" class="toggle-arrow">&#9664;</button>
         <section class="controls">
             <div class="controls-content">
                 <label for="start">Начальная точка (город или адрес):</label>
                 <input type="text" id="start" placeholder="Москва, Красная площадь">
+                <div id="start-suggestions" class="suggestions"></div> <!-- Контейнер для подсказок -->
+        
                 <label for="end">Конечная точка (город или адрес):</label>
                 <input type="text" id="end" placeholder="Москва, Ленинградский проспект">
+                <div id="end-suggestions" class="suggestions"></div> <!-- Контейнер для подсказок -->
+        
                 <button onclick="buildRouteFromInput()">Построить маршрут</button>
                 <div id="loading">Загрузка...</div>
-                <div id="route-info"></div>  
+                <div id="route-info"></div>
             </div>
         </section>
 

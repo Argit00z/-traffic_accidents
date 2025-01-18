@@ -7,10 +7,10 @@
 
 .controls {
     position: fixed;
-    top: 0;
+    top: 60px; /* Отступ сверху, чтобы не заходить на header */
     left: 0;
-    height: 100vh;
-    width: 300px; /* Ширина блока */
+    height: calc(100vh - 60px); /* Высота с учетом отступа */
+    width: 20%; /* Ширина блока */
     background-color: #f0f0f0;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease-in-out;
@@ -28,19 +28,32 @@
 
 .controls input {
     margin: 10px 0;
-    padding: 8px;
+    padding: 10px;
     width: 100%;
     box-sizing: border-box; /* Чтобы padding не увеличивал ширину */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.controls input:focus {
+    border-color: #333;
+    outline: none; /* Убираем стандартный outline */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Добавляем тень при фокусе */
 }
 
 .controls button {
     margin: 10px 0;
-    padding: 10px;
+    padding: 12px;
     width: 100%;
     background-color: #333;
     color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease-in-out;
 }
 
 .controls button:hover {
@@ -67,7 +80,8 @@
 
 .leaflet-top .leaflet-control {
     margin-top: 60px;
-    margin-left: 320px;
+    margin-left: 360px;
+    transition: margin-left 0.3s ease-in-out; /* Анимация для кнопок масштабирования */
 }
 
 html {
@@ -128,11 +142,76 @@ header {
 #toggle-controls {
     position: fixed;
     top: 300px;
-    left: 310px; /* Положение кнопки рядом с блоком controls */
+    left: calc(20% + 20px); /* Положение кнопки рядом с блоком controls */
     z-index: 1000;
     padding: 10px;
     background-color: #333;
     color: white;
     border: none;
     cursor: pointer;
+    transition: 0.3s ease-in-out; 
+}
+
+#toggle-controls.toggle-arrow {
+    position: fixed;
+    top: 300px;
+    left: calc(20% + 20px); /* Положение кнопки рядом с блоком controls */
+    z-index: 1000;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+#toggle-controls.toggle-arrow:hover {
+    background-color: #555;
+}
+
+/* Начальное состояние стрелки (блок открыт) */
+#toggle-controls.toggle-arrow {
+    transform: rotate(0deg); /* Стрелка указывает влево */
+    transition: 0.3s ease-in-out;
+}
+
+/* Состояние стрелки при скрытом блоке */
+#toggle-controls.toggle-arrow.rotated {
+    transform: rotate(180deg); /* Стрелка указывает вправо */
+    transition: 0.3s ease-in-out;
+}
+
+.suggestions {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    width: calc(100% - 20px); /* Ширина как у input */
+    z-index: 1000; /* Чтобы подсказки были поверх других элементов */
+    border-radius: 5px;
+    margin-top: 5px;
+    display: none; /* Скрываем контейнер по умолчанию */
+}
+
+.suggestions.visible {
+    display: block; /* Показываем контейнер, когда есть подсказки */
+}
+
+.suggestions div {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.suggestions div:hover {
+    background-color: #f0f0f0;
 }
