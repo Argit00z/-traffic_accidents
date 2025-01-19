@@ -215,3 +215,70 @@ header {
 .suggestions div:hover {
     background-color: #f0f0f0;
 }
+
+#legend {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+#legend h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+#legend p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.legend-marker {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+/* Стили для обучающего туториала */
+.info.tutorial {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    font-family: Arial, sans-serif;
+    max-width: 300px;
+}
+
+.info.tutorial h4 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.info.tutorial p {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.info.tutorial button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.info.tutorial button:hover {
+    background-color: #0056b3;
+}

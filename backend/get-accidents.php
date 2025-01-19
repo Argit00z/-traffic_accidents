@@ -23,6 +23,7 @@ if (!$connection) {
 $region = $_GET['region'] ?? null;
 $start_date = $_GET['start_date'] ?? '2023-01-01'; // Начальная дата по умолчанию
 $end_date = $_GET['end_date'] ?? '2024-12-31';     // Конечная дата по умолчанию
+$experience = $_GET['experience'] ?? 'beginner';   // Стаж вождения по умолчанию
 $limit = 100000; // Ограничиваем количество строк
 
 // Проверяем, что регион передан
@@ -38,12 +39,21 @@ $regions = array_map('pg_escape_string', explode(',', $region));
 $categories = ['Наезд на пешехода', 'Столкновение', 'Наезд на стоящее ТС', 'Наезд на препятствие'];
 $categories = array_map('pg_escape_string', $categories);
 
-// Формируем SQL-запрос
+// Формируем SQL-запрос в зависимости от стажа вождения
+if ($experience === 'beginner') {
+    // Для начинающих водителей учитываем все степени тяжести
+    $severityCondition = "severity IN ('Легкий', 'Тяжёлый', 'С погибшими')";
+} else {
+    // Для опытных водителей учитываем только тяжёлые ДТП и ДТП с погибшими
+    $severityCondition = "severity IN ('Тяжёлый', 'С погибшими')";
+}
+
 $query = "SELECT id, latitude, longitude, severity, category 
           FROM accidents 
           WHERE region IN ('" . implode("','", $regions) . "')
           AND datetime::date BETWEEN '$start_date' AND '$end_date'
           AND category IN ('" . implode("','", $categories) . "')
+          AND $severityCondition
           LIMIT $limit";
 
 // Выполняем запрос

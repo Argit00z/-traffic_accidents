@@ -7,10 +7,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
     <link rel="stylesheet" href="./styles/style.css">
-
-    <script src="./scripts/script.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
     <script src="/backend/script_map.js" defer></script>
+    <script src="./scripts/script.js"></script>
     
 </head>
 <body>
@@ -31,12 +30,19 @@
             <div class="controls-content">
                 <label for="start">Начальная точка (город или адрес):</label>
                 <input type="text" id="start" placeholder="Москва, Красная площадь">
-                <div id="start-suggestions" class="suggestions"></div> <!-- Контейнер для подсказок -->
-        
+                <div id="start-suggestions" class="suggestions"></div>
+                
                 <label for="end">Конечная точка (город или адрес):</label>
                 <input type="text" id="end" placeholder="Москва, Ленинградский проспект">
-                <div id="end-suggestions" class="suggestions"></div> <!-- Контейнер для подсказок -->
-        
+                <div id="end-suggestions" class="suggestions"></div>
+                
+                <!-- Добавляем выбор стажа вождения -->
+                <label for="experience">Стаж вождения:</label>
+                <select id="experience">
+                    <option value="beginner">Начинающий</option>
+                    <option value="experienced">Опытный</option>
+                </select>
+                
                 <button onclick="buildRouteFromInput()">Построить маршрут</button>
                 <div id="loading">Загрузка...</div>
                 <div id="route-info"></div>
@@ -45,6 +51,16 @@
 
         <section class="application">
             <div id="map"></div>
+            <!-- Легенда карты -->
+            <div id="legend">
+                <h4>Легенда</h4>
+                <p><span class="legend-marker" style="background-color: red;"></span> Наезд на пешехода</p>
+                <p><span class="legend-marker" style="background-color: blue;"></span> Столкновение</p>
+                <p><span class="legend-marker" style="background-color: green;"></span> Наезд на стоящее ТС</p>
+                <p><span class="legend-marker" style="background-color: orange;"></span> Наезд на препятствие</p>
+                <p><span class="legend-marker" style="background-color: gray;"></span> Другие категории</p>
+                <p><span style="color: blue;">━</span> Ваш маршрут</p>
+            </div>
         </section>
     </main>
 </body>
