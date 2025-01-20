@@ -295,6 +295,28 @@ async function buildRoute(start, end) {
         // Определение опасных участков
         const dangerousSections = findDangerousSections(route, accidents);
 
+        // Сохраняем маршрут и рекомендации в базу данных
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+            const saveRouteResponse = await fetch('/backend/save_route.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    start_point: `${start.lat},${start.lng}`,
+                    end_point: `${end.lat},${end.lng}`,
+                    route_coordinates: JSON.stringify(route),
+                    recommendations: JSON.stringify(dangerousSections)
+                })
+            });
+
+            if (!saveRouteResponse.ok) {
+                throw new Error('Ошибка при сохранении маршрута');
+            }
+        }
+
         // Группировка опасных участков
         const groupedSections = groupPoints(dangerousSections, 1); // Группируем точки в пределах 1 км
 
@@ -468,4 +490,32 @@ function buildRouteFromInput() {
     } else {
         alert('Пожалуйста, введите начальную и конечную точки.');
     }
+}
+
+// Функция для отображения рекомендаций на карте
+function displayRecommendations(recommendations) {
+    if (!recommendations || !Array.isArray(recommendations)) {
+        console.error('Рекомендации не переданы или переданы в неверном формате');
+        return;
+    }
+
+    recommendations.forEach(recommendation => {
+        const marker = L.circleMarker([recommendation.lat, recommendation.lng], {
+            color: recommendation.color || 'red', // Цвет маркера (по умолчанию красный)
+            radius: 5 + Math.log(recommendation.count || 1) * 2, // Размер маркера зависит от количества ДТП
+            fillOpacity: 0.8
+        }).addTo(map);
+
+        // Всплывающая подсказка с информацией
+        const tooltipText = `
+            <strong>Количество ДТП:</strong> ${recommendation.count || 0}<br>
+            <strong>Категория ДТП:</strong> ${recommendation.category || 'Неизвестно'}<br>
+            <strong>Рекомендация:</strong> ${getWarningByCategory(recommendation.category)}<br>
+            <em>Этот участок находится вблизи вашего маршрута (в пределах 100 метров).</em>
+        `;
+        marker.bindTooltip(tooltipText, { permanent: false, direction: 'top' });
+
+        // Добавляем маркер в массив для последующего удаления
+        mapElements.markers.push(marker);
+    });
 }

@@ -6,18 +6,40 @@ document.addEventListener('DOMContentLoaded', function() {
     // Изначально блок открыт, стрелка указывает влево
     toggleButton.innerHTML = '&#9664;'; // Стрелка влево
 
+    // Функция для обновления отступов в зависимости от ширины экрана
+    function updateMargins() {
+        const screenWidth = window.innerWidth;
+        let toggleButtonMargin, leafletControlsMargin;
+
+        if (screenWidth < 400) {
+            // Для мобильных устройств
+            toggleButtonMargin = controlsSection.classList.contains('hidden') ? '10px' : '260px';
+            leafletControlsMargin = controlsSection.classList.contains('hidden') ? '20px' : '260px';
+        }else {
+            // Для десктопов
+            toggleButtonMargin = controlsSection.classList.contains('hidden') ? '10px' : '360px';
+            leafletControlsMargin = controlsSection.classList.contains('hidden') ? '20px' : '360px';
+        }
+
+        // Применяем значения отступов
+        toggleButton.style.marginLeft = toggleButtonMargin;
+        leafletControls.style.marginLeft = leafletControlsMargin;
+    }
+
+    // Обработчик клика по кнопке
     toggleButton.addEventListener('click', function() {
         controlsSection.classList.toggle('hidden');
         toggleButton.classList.toggle('rotated'); // Добавляем/удаляем класс для вращения
-
-        if (controlsSection.classList.contains('hidden')) {
-            toggleButton.style.left = '10px'; // Если блок скрыт, кнопка перемещается влево
-            leafletControls.style.marginLeft = '20px'; // Перемещаем кнопки масштабирования
-        } else {
-            toggleButton.style.left = 'calc(20% + 20px)'; // Если блок видим, кнопка возвращается на место
-            leafletControls.style.marginLeft = '360px'; // Возвращаем кнопки масштабирования на место
-        }
+        updateMargins(); // Обновляем отступы
     });
+
+    // Обработчик изменения размера окна
+    window.addEventListener('resize', function() {
+        updateMargins(); // Обновляем отступы при изменении размера окна
+    });
+
+    // Инициализация отступов при загрузке страницы
+    updateMargins();
 });
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -88,3 +110,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+

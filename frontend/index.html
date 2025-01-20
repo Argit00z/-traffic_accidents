@@ -10,6 +10,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
     <script src="/backend/script_map.js" defer></script>
     <script src="./scripts/script.js"></script>
+    <script src="/backend/script_auth.js" defer></script>
     
 </head>
 <body>
@@ -17,9 +18,15 @@
         <nav class="nav_header">
             <ul>
                 <li><a href="#">Главная</a></li>
-                <li><a href="#">О проекте</a></li>
-                <li><a href="#">Контакты</a></li>
-                <li><a href="#">Войти</a></li>
+                <li><a href="https://tochno.st/datasets/traffic_accidents ">Источник открытых данных</a></li>
+                <li>
+                    <!-- Кнопка "История маршрутов" -->
+                    <a href="#" id="historyButton">История маршрутов</a>
+                </li>
+                <li id="authButtonContainer">
+                    <!-- Динамическая кнопка -->
+                    <a href="#" id="authButton">Войти</a>
+                </li>
             </ul>
         </nav>
     </header>
@@ -62,6 +69,56 @@
                 <p><span style="color: blue;">━</span> Ваш маршрут</p>
             </div>
         </section>
+        <!-- Модальное окно для авторизации -->
+        <div id="authModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                
+                <!-- Заголовок и переключатели -->
+                <h2 id="authTitle">Вход</h2>
+                <div class="auth-switch">
+                    <button id="switchToLogin" class="active">Вход</button>
+                    <button id="switchToRegister">Регистрация</button>
+                </div>
+
+                <!-- Форма входа -->
+                <form id="loginForm" class="auth-form">
+                    <label style="float: left;" for="username">Имя пользователя:</label>
+                    <input type="text" id="username" name="username" required>
+                    
+                    <label style="float: left;" for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                    
+                    <button type="submit">Войти</button>
+                </form>
+
+                <!-- Форма регистрации -->
+                <form id="registerForm" class="auth-form" style="display: none;">
+                    <label style="float: left;" for="regUsername">Имя пользователя:</label>
+                    <input type="text" id="regUsername" name="regUsername" required>
+                    
+                    <label style="float: left;" for="regPassword">Пароль:</label>
+                    <input type="password" id="regPassword" name="regPassword" required>
+                    
+                    <label style="float: left;" for="confirmPassword">Подтвердите пароль:</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    
+                    <button type="submit">Зарегистрироваться</button>
+                </form>
+
+                <!-- Сообщения об ошибках -->
+                <p id="authError" style="color: red; display: none;"></p>
+            </div>
+        </div>
+        <!-- Модальное окно для истории маршрутов
+        <div id="historyModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>История маршрутов</h2>
+                <ul id="historyList"></ul>
+            </div>
+        </div> -->
     </main>
+
 </body>
 </html>
