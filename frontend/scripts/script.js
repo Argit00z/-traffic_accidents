@@ -111,4 +111,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const burgerMenu = document.querySelector(".burger-menu");
+    const menuContainer = document.querySelector(".menu-container");
 
+    burgerMenu.addEventListener("click", function () {
+        menuContainer.classList.toggle("active"); // Переключаем видимость меню
+    });
+});

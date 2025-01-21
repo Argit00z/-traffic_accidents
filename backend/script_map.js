@@ -171,7 +171,7 @@ function getDistance(point1, point2) {
     return R * c; // Расстояние в километрах
 }
 
-// Функция для группировки точек по близости и категориям ДТП
+// Функция для группировки точек
 function groupPoints(points, maxDistance) {
     const groupedPoints = [];
     points.forEach(point => {
@@ -253,6 +253,23 @@ async function getLocationFromCoordinates(lat, lng) {
     } catch (error) {
         console.error('Ошибка при определении населенного пункта:', error);
         return 'неизвестно';
+    }
+}
+
+// Функция для получения адреса по координатам
+async function getAddressFromCoordinates(lat, lng) {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.address) {
+            // Возвращаем улицу, если она есть, или другой адрес
+            return data.address.road || data.address.hamlet || data.address.village || data.address.city || 'Неизвестный адрес';
+        }
+        return 'Неизвестный адрес';
+    } catch (error) {
+        console.error('Ошибка при получении адреса:', error);
+        return 'Неизвестный адрес';
     }
 }
 
@@ -418,52 +435,59 @@ async function buildRoute(start, end) {
         let infoText = '';
 
         // Проходим по отсортированным группам и выводим их в порядке маршрута
+        let counter = 1; // Счетчик для нумерации участков и кнопок
         for (const [location, sections] of locationsMap) {
             infoText += `<strong>${location}</strong><br>`;
 
             // Выводим участки "въезд"
             if (sections.въезд.length > 0) {
                 infoText += `<p>При въезде в город ${location} будьте осторожны на следующих участках:</p>`;
-                sections.въезд.forEach(group => {
+                for (const group of sections.въезд) {
                     const centerLat = group.center[1].toFixed(4);
                     const centerLng = group.center[0].toFixed(4);
+                    const address = await getAddressFromCoordinates(centerLat, centerLng); // Получаем адрес
                     infoText += `
                         <div class="recommendation">
-                            <p>Будьте осторожны на участке.</p>
-                            <button onclick="map.setView([${centerLat}, ${centerLng}], 15)">Перейти к участку</button>
+                            <p><strong>Участок ${counter}:</strong> ${address}</p>
+                            <button onclick="map.setView([${centerLat}, ${centerLng}], 15)">Перейти к участку ${counter}</button>
                         </div>
                     `;
-                });
+                    counter++;
+                }
             }
 
             // Выводим участки "внутри"
             if (sections.внутри.length > 0) {
                 infoText += `<p>В городе ${location} будьте осторожны на следующих участках:</p>`;
-                sections.внутри.forEach(group => {
+                for (const group of sections.внутри) {
                     const centerLat = group.center[1].toFixed(4);
                     const centerLng = group.center[0].toFixed(4);
+                    const address = await getAddressFromCoordinates(centerLat, centerLng); // Получаем адрес
                     infoText += `
                         <div class="recommendation">
-                            <p>Будьте осторожны на участке.</p>
-                            <button onclick="map.setView([${centerLat}, ${centerLng}], 15)">Перейти к участку</button>
+                            <p><strong>Участок ${counter}:</strong> ${address}</p>
+                            <button onclick="map.setView([${centerLat}, ${centerLng}], 15)">Перейти к участку ${counter}</button>
                         </div>
                     `;
-                });
+                    counter++;
+                }
             }
 
             // Выводим участки "выезд"
             if (sections.выезд.length > 0) {
                 infoText += `<p>При выезде из города ${location} будьте осторожны на следующих участках:</p>`;
-                sections.выезд.forEach(group => {
+                for (const group of sections.выезд) {
                     const centerLat = group.center[1].toFixed(4);
                     const centerLng = group.center[0].toFixed(4);
+                    const address = await getAddressFromCoordinates(centerLat, centerLng); // Получаем адрес
                     infoText += `
                         <div class="recommendation">
-                            <p>Будьте осторожны на участке.</p>
-                            <button onclick="map.setView([${centerLat}, ${centerLng}], 15)">Перейти к участку</button>
+                            <p><strong>Участок ${counter}:</strong> ${address}</p>
+                            <button onclick="map.setView([${centerLat}, ${centerLng}], 15)">Перейти к участку ${counter}</button>
                         </div>
                     `;
-                });
+                    counter++;
+                }
             }
         }
 

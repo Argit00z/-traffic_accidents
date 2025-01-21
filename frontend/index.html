@@ -16,17 +16,19 @@
 <body>
     <header>
         <nav class="nav_header">
-            <ul>
-                <li class="left"><a href="#">Рекомендации по маршруту</a></li>
-                <li class="right"><a href="#">Главная</a></li>
-                <li class="right"><a href="https://tochno.st/datasets/traffic_accidents">Источник открытых данных</a></li>
-                <li class="right">
-                    <a href="#" id="historyButton">История маршрутов</a>
-                </li>
-                <li class="right" id="authButtonContainer">
-                    <a href="#" id="authButton">Войти</a>
-                </li>
-            </ul>
+            <div class="title">Рекомендации по маршруту</div>
+            <!-- Кнопка "бургер" для мобильных устройств -->
+            <button class="burger-menu" aria-label="Открыть меню">&#9776;</button>
+            <!-- Контейнер для списка -->
+            <div class="menu-container">
+                <ul>
+                    <li class="right"><a href="#">Главная</a></li>
+                    <li class="right"><a href="https://tochno.st/datasets/traffic_accidents">Источник открытых данных</a></li>
+                    <li class="right" id="authButtonContainer">
+                        <a href="#" id="authButton">Войти</a>
+                    </li>
+                </ul>
+            </div>
         </nav>
     </header>
 
