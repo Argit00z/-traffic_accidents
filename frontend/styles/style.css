@@ -25,7 +25,10 @@
        
     }
     
+    
 }
+
+
 
 
 .controls.hidden {
@@ -137,7 +140,8 @@ header {
     margin: 0;
     padding: 0;
     display: flex;
-    float: right;
+    justify-content: space-between; /* Распределяет пространство между элементами */
+    align-items: center; /* Выравнивает элементы по вертикали */
     padding-right: 20px;
 }
 
@@ -154,9 +158,18 @@ header {
     display: block;
 }
 
-.nav_header li a:hover {
+.nav_header li.right a:hover {
     background-color: #34495e;
     border-radius: 5px;
+}
+
+.nav_header ul li.left {
+    margin-right: auto; 
+    font-size: 20px;
+}
+
+.nav_header ul li.right {
+    float: right;
 }
 
 #toggle-controls {

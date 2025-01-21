@@ -17,14 +17,13 @@
     <header>
         <nav class="nav_header">
             <ul>
-                <li><a href="#">Главная</a></li>
-                <li><a href="https://tochno.st/datasets/traffic_accidents ">Источник открытых данных</a></li>
-                <li>
-                    <!-- Кнопка "История маршрутов" -->
+                <li class="left"><a href="#">Рекомендации по маршруту</a></li>
+                <li class="right"><a href="#">Главная</a></li>
+                <li class="right"><a href="https://tochno.st/datasets/traffic_accidents">Источник открытых данных</a></li>
+                <li class="right">
                     <a href="#" id="historyButton">История маршрутов</a>
                 </li>
-                <li id="authButtonContainer">
-                    <!-- Динамическая кнопка -->
+                <li class="right" id="authButtonContainer">
                     <a href="#" id="authButton">Войти</a>
                 </li>
             </ul>
@@ -51,7 +50,7 @@
                 </select>
                 
                 <button onclick="buildRouteFromInput()">Построить маршрут</button>
-                <div id="loading">Загрузка...</div>
+                <div style="color: white;" id="loading">Загрузка...</div>
                 <div id="route-info"></div>
             </div>
         </section>
