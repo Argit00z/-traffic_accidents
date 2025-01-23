@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>О проекте</title>
+    <link rel="stylesheet" href="./styles/style.css"> <!-- Подключаем стили -->
+</head>
+<body>
+    <header>
+        <nav class="nav_header">
+            <div class="title">Рекомендации по маршруту</div>
+            <button class="burger-menu" aria-label="Открыть меню">&#9776;</button>
+            <div class="menu-container">
+                <ul>
+                    <li class="right"><a href="index.html">Главная</a></li>
+                    <li class="right"><a href="about.html">О проекте</a></li>
+                    <li class="right"><a href="https://tochno.st/datasets/traffic_accidents">Источник открытых данных</a></li>       
+                    <li class="right" id="authButtonContainer">
+                        <a href="#" id="authButton">Войти</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="about-section">
+            <h1>О проекте</h1>
+            <p>
+                Мы анализируем данные о дорожно-транспортных происшествиях (ДТП) на территории России за период с 2020 по 2024 год.
+                На основе этих данных мы визуализируем опасные участки дорог на карте, предоставляя пользователям подробную информацию о каждом из них.
+                Это позволяет водителям заранее узнать о потенциальных рисках на маршруте и принять меры для повышения <strong>безопасности</strong>.
+            </p>
+            <h2>Как это работает?</h2>
+            <ol>
+                <li>
+                    <strong>Введите начальную и конечную точки:</strong>
+                    Укажите адрес или название города для начала и конца маршрута.
+                </li>
+                <li>
+                    <strong>Выберите стаж вождения:</strong>
+                    Укажите, являетесь ли вы начинающим или опытным водителем. Это влияет на рекомендации.
+                </li>
+                <li>
+                    <strong>Постройте маршрут:</strong>
+                    Нажмите кнопку "Построить маршрут", и система рассчитает оптимальный путь.
+                </li>
+                <li>
+                    <strong>Получите рекомендации:</strong>
+                    На карте будут отмечены опасные участки с описанием категорий ДТП и советами по безопасности.
+                </li>
+            </ol>
+            <h2>Источники данных</h2>
+            <p>
+                Мы используем открытые данные о ДТП, предоставленные проектом <a style="color: #3498db; text-decoration: none;" href="https://tochno.st/datasets/traffic_accidents" target="_blank">Tochno.st</a>.
+                Эти данные включают информацию о местоположении, категории и тяжести ДТП.
+            </p>
+            <h2>Почему это важно?</h2>
+            <p>
+                Знание о потенциально опасных участках дороги помогает водителям быть более внимательными и снижает вероятность аварий.
+                Мы стремимся сделать дороги безопаснее для всех участников движения.
+            </p>
+            <a href="index.html" class="back-button">Вернуться на главную</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Рекомендации по маршруту. Все права защищены.</p>
+    </footer>
+</body>
+</html>

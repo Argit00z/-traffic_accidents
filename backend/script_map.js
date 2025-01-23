@@ -437,7 +437,11 @@ async function buildRoute(start, end) {
         // Проходим по отсортированным группам и выводим их в порядке маршрута
         let counter = 1; // Счетчик для нумерации участков и кнопок
         for (const [location, sections] of locationsMap) {
-            infoText += `<strong>${location}</strong><br>`;
+            // Подсчет общего количества опасных участков для текущего региона
+            const totalDangerousSections = sections.въезд.length + sections.внутри.length + sections.выезд.length;
+
+            // Выводим количество опасных участков для региона
+            infoText += `<strong>${location}</strong> (опасных участков: ${totalDangerousSections})<br>`;
 
             // Выводим участки "въезд"
             if (sections.въезд.length > 0) {
